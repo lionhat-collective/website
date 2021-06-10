@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <title>Next.js Persistent Layouts in TypeScript | lionhat collective</title>
+    <style>
+        body {
+            max-width: 512px;
+        }
+        blockquote {
+            background-color: hsl(246, 67%, 80%);
+            padding: 0.4rem;
+            display: block;
+        }
+        code {
+            font-style: oblique;
+            display: inline-block;
+        }
+        pre {
+            display: block;
+            color: hsl(214, 32%, 32%);
+            padding: 0.4rem;
+            background-color: hsl(214, 59%, 84%);
+        }
+    </style>
+</head>
+<body>
+    <a href="/index.html">Return to Homepage</a>
+    <h1>Next.js Persistent Layouts in TypeScript</h1>
+    <p>
+        Based off the work that <a href="https://adamwathan.me/2019/10/17/persistent-layout-patterns-in-nextjs/" target="_blank" rel="noopener noreferrer">Adam Wathan</a>
+        did on persistent layouts in Next.js, I decided to take it a step further and add the complexity of TypeScript into the mix.
+    </p>
+    
+    <p>
+        Adam's solution worked great for the most part, however I wanted the option to pass properties on a page-by-page basis
+        when rendering a layout. With this in mind, I cooked up a small high-order component to do the job.
+    </p>
+
+    <p>
+        To start off, I needed a way to extend the <code>AppProps</code> type that Next.js provides with my own.
+    </p>
+    <section id='app-props-example'>
+        <code>
+<pre>
+interface MyAppProps&lt;P = {}&gt; extends AppProps&lt;P&gt; {
+    Component: NextComponentType&lt;NextPageContext, any, P&gt; & {
+        Layout?: (page: React.ReactNode) => JSX.Element,
+    }
+}
+</pre>
+        </code>
+    </section>
+
+    <p>
+        Creating a new interface (in this case <code>MyAppProps</code>) that overrides the <code>AppProps</code>
+        <code>Component</code> definition allows me to add additional properties to the <code>Component</code> prototype.
+        This <code>Layout</code> function signature is 1:1 with what Adam explained in his post. (if it aint broke, dont fix it!)
+    </p>
+
+    <p>
+        Continuing on, similarly to what Adam explained in his post, we need to wrap the page component being rendered by Next.js
+        with our layout component. Simple enough!
+    </p>
+
+    <code>
+<pre>
+let NOOP = withLayout(
+    ({ children }: React.PropsWithChildren&lt;{}&gt;) => children
+)
+
+function MyApp({ Component, pageProps, ...props }: MyAppProps) {
+    let Layout = Component.Layout || NOOP
+    
+    // ...
+    
+    return (
+        Layout(&lt;Component {...pageProps} /&gt;)
+    )
+}
+</pre>
+    </code>
+
+    <p>With all that boilerplate done away with, here is the fun part!</p>
+    <section>
+        <strong>withLayout.tsx</strong>
+        <code>
+<pre>
+export interface LayoutProps {
+    title?: string
+}
+
+type WithLayout = (
+    Layout: React.ComponentType&lt;Omit&lt;LayoutProps, 'children'&gt;&gt;,
+    props?: React.ComponentPropsWithoutRef&lt;typeof Layout&gt;
+) =&gt; (page: React.ReactNode) =&gt; React.ReactNode
+
+export const withLayout: WithLayout = (Layout, props) =&gt; 
+    (page) =&gt; &lt;Layout {...props}&gt;{page}&lt;/Layout&gt;
+</pre>
+        </code>
+
+        <blockquote>
+            <strong>Side Note:</strong>
+            <p>
+                You could go as far as to wrap the <code>Layout</code>
+                component inside <code>withLayout</code> with a "Skeleton Layout"
+                component that takes most/all of the base properties to avoid having
+                to pass the base properties down each time in every "child layout" 
+            </p>
+            <em>e.g.</em>
+            <code>
+<pre>
+function BaseLayout({ children, title }) {
+    return (
+        &lt;&gt;
+            &lt;Head&gt;
+                &lt;title&gt;{title}&lt;/title&gt;
+            &lt;/Head&gt;
+            {children}
+        &lt;/&gt;
+    )
+}
+
+export const withLayout: WithLayout = (Layout, props) =&gt; 
+    (page) =&gt; (
+        &lt;BaseLayout {...props}&gt;
+            &lt;Layout {...props}&gt;
+                {page}
+            &lt;/Layout&gt;
+        &lt;/BaseLayout&gt;
+    )
+</pre>
+            </code>
+        </blockquote>
+    </section>
+
+    <p>The <code>withLayout</code> high-order component.</p>
+    <p>This allows us to define the layout component and specify the props that are based on a common set of props
+        as defined by the <code>LayoutProps</code> interface.
+    </p>
+    <p>
+        A comparison:
+    </p>
+    <code>
+<pre>
+IndexPage.Layout = page => <HomeLayout>{page}</HomeLayout>
+</pre>
+    </code>
+    <p>To</p>
+    <code>
+<pre>
+IndexPage.Layout = withLayout(HomeLayout, {
+    title: 'Home',
+    // ...extra type-hinted props
+})
+</pre>
+    </code>
+    <a href="/index.html" style="display: block">Return to Homepage</a>
+</body>
+</html>
