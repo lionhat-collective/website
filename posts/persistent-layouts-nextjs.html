@@ -73,7 +73,7 @@ interface MyAppProps&lt;P = {}&gt; extends AppProps&lt;P&gt; {
     <code>
 <pre>
 let NOOP = withLayout(
-    ({ children }: React.PropsWithChildren&lt;{}&gt;) => &lt;&gt;children&lt;/&gt;
+    ({ children }: React.PropsWithChildren&lt;{}&gt;) => &lt;&gt;{children}&lt;/&gt;
 )
 
 function MyApp({ Component, pageProps, ...props }: MyAppProps) {
