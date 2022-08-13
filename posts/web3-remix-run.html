@@ -171,6 +171,13 @@ import { BufferShim as Buffer } from 'buffer-esm'
 window.Buffer = window.Buffer || Buffer;
 </pre>
         </code>
+        <p>Then, make sure you have assigned <code>global</code> to the window object.</p>
+        <p>Open the file <code>app/routes/root.tsx</code> and insert the following script tag in the document <code>&lt;head&gt;</code>:</p>
+        <code>
+<pre>
+&lt;script&gt;{`var global = global || window;`}&lt;/script&gt;
+</pre>
+        </code>
         <div id="end">
             <p>You&apos;re done!</p>
         </div>
