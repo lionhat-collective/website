@@ -7,6 +7,10 @@
         {
             "source": "/safety-pins-poor-choices",
             "destination": "https://opensea.io/collection/safetypins-poorchoices"
+        },
+        {
+            "source": "/privacy",
+            "destination": "https://lionhat.co/legal/privacy"
         }
     ]
 }
