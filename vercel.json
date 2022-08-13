@@ -10,7 +10,7 @@
         },
         {
             "source": "/privacy",
-            "destination": "https://lionhat.co/legal/privacy"
+            "destination": "https://lionhat.co/legal/privacy.html"
         }
     ]
 }
