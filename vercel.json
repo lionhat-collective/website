@@ -1,6 +1,10 @@
 {
     "redirects": [
         {
+            "source": "/",
+            "destination": "https://techstride.ca"
+        },
+        {
             "source": "/dark-things",
             "destination": "https://itunes.apple.com/us/app/dark-things/id1437755460?ls=1&mt=82e"
         },
